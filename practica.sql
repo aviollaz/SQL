@@ -168,11 +168,11 @@ GO
 -- C16 | Precio promedio por género
 -- Para cada género que tenga tracks, calcular cantidad y precio unitario promedio de tracks. Devolver solo géneros con al menos 10 tracks. Mostrar GenreId, nombre, cantidad, precio_promedio; ordenar por promedio descendente y GenreId.
 
-SELECT g.genreId, g.Name, COUNT(t.TrackId) as cantidad_tracks, AVG(t.UnitPrice) as precio_promedio
-FROM Track t JOIN Genre g on g.GenreId = t.GenreId
-GROUP BY g.genreId, g.Name
-HAVING COUNT(t.TrackId) > 9
-ORDER BY precio_promedio DESC, g.GenreId
+-- SELECT g.genreId, g.Name, COUNT(t.TrackId) as cantidad_tracks, AVG(t.UnitPrice) as precio_promedio
+-- FROM Track t JOIN Genre g on g.GenreId = t.GenreId
+-- GROUP BY g.genreId, g.Name
+-- HAVING COUNT(t.TrackId) > 9
+-- ORDER BY precio_promedio DESC, g.GenreId
 
 
 GO
@@ -180,24 +180,46 @@ GO
 -- C17 | Compras por tipo de medio
 -- Mostrar cada MediaTypeId, nombre, cantidad de líneas de factura relacionadas con sus tracks y unidades vendidas. Incluir tipos sin ventas con ceros. Ordenar por unidades descendente y MediaTypeId.
 
+-- SELECT m.MediaTypeId, m.Name, COUNT(il.invoiceLineId) as cantidad_lineas_facturas, ISNULL(SUM(il.Quantity), 0) as unidades_vendidas
+-- FROM MediaType m LEFT JOIN Track t ON m.MediaTypeId = t.MediaTypeId LEFT JOIN InvoiceLine il ON il.TrackId = t.TrackId
+-- GROUP BY m.MediaTypeId, m.Name
+-- ORDER BY unidades_vendidas DESC, m.MediaTypeId ASC
 
 GO
 
 -- C18 | Máxima factura por cliente
 -- Para cada cliente que tenga facturas, mostrar CustomerId, nombre, apellido y el importe máximo de una de sus facturas. Ordenar por importe máximo descendente y luego CustomerId.
 
+-- SELECT c.CustomerId, c.FirstName, c.LastName, MAX(i.total) as importe_maximo
+-- FROM Customer c JOIN Invoice i ON c.CustomerId = i.CustomerId
+-- GROUP BY c.CustomerId, c.FirstName, c.LastName
+-- ORDER BY importe_maximo DESC, c.CustomerId ASC
 
 GO
 
 -- C19 | Artistas sin álbumes
 -- Listar ArtistId y Name de artistas que no tienen ningún álbum registrado. Ordenar por ArtistId. Encontrar ausencia de relación, no álbumes con cero tracks.
 
-
-GO
+-- SELECT ar.ArtistId, ar.Name
+-- FROM Artist ar LEFT JOIN Album a ON ar.ArtistId = a.ArtistId
+-- WHERE a.AlbumId IS NULL
+-- ORDER BY ar.ArtistId;
 
 -- C20 | Álbumes con Rock y otro género
 -- Listar AlbumId, título del álbum y nombre del artista de álbumes que tengan al menos un track del género Rock **y** al menos un track de un género distinto de Rock. Ordenar por AlbumId.
 
+SELECT a.AlbumId, a.Title, ar.Name
+FROM Album a JOIN Artist ar ON a.ArtistId = ar.ArtistId
+WHERE EXISTS (
+    SELECT 1
+    FROM Track t1 JOIN Genre g1 ON t1.GenreId = g1.GenreId
+    WHERE t1.AlbumId = a.AlbumId AND g1.Name = 'Rock'
+) AND EXISTS (
+    SELECT 1
+    FROM Track t2 JOIN Genre g2 ON t2.GenreId = g2.GenreId
+    WHERE t2.AlbumId = a.AlbumId AND g2.Name <> 'Rock'
+)
+ORDER BY a.AlbumId ASC
 
 GO
 
