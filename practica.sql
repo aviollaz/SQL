@@ -208,31 +208,45 @@ GO
 -- C20 | Álbumes con Rock y otro género
 -- Listar AlbumId, título del álbum y nombre del artista de álbumes que tengan al menos un track del género Rock **y** al menos un track de un género distinto de Rock. Ordenar por AlbumId.
 
-SELECT a.AlbumId, a.Title, ar.Name
-FROM Album a JOIN Artist ar ON a.ArtistId = ar.ArtistId
-WHERE EXISTS (
-    SELECT 1
-    FROM Track t1 JOIN Genre g1 ON t1.GenreId = g1.GenreId
-    WHERE t1.AlbumId = a.AlbumId AND g1.Name = 'Rock'
-) AND EXISTS (
-    SELECT 1
-    FROM Track t2 JOIN Genre g2 ON t2.GenreId = g2.GenreId
-    WHERE t2.AlbumId = a.AlbumId AND g2.Name <> 'Rock'
-)
-ORDER BY a.AlbumId ASC
+-- SELECT a.AlbumId, a.Title, ar.Name
+-- FROM Album a JOIN Artist ar ON a.ArtistId = ar.ArtistId
+-- WHERE EXISTS (
+--     SELECT 1
+--     FROM Track t1 JOIN Genre g1 ON t1.GenreId = g1.GenreId
+--     WHERE t1.AlbumId = a.AlbumId AND g1.Name = 'Rock'
+-- ) AND EXISTS (
+--     SELECT 1
+--     FROM Track t2 JOIN Genre g2 ON t2.GenreId = g2.GenreId
+--     WHERE t2.AlbumId = a.AlbumId AND g2.Name <> 'Rock'
+-- )
+-- ORDER BY a.AlbumId ASC
 
 GO
 
 -- C21 | Tracks vendidos en múltiples facturas
 -- Listar TrackId, nombre y cantidad de facturas distintas en que aparece, para tracks presentes en al menos dos facturas distintas. Ordenar por cantidad descendente y TrackId ascendente.
 
+-- SELECT t.TrackId, t.Name, COUNT(DISTINCT(il.InvoiceId)) as cantidad_facturas
+-- FROM Track t 
+-- JOIN InvoiceLine il ON t.TrackId = il.TrackId 
+-- GROUP BY t.TrackId, t.Name
+-- HAVING COUNT(DISTINCT(il.InvoiceId)) > 1
+-- ORDER BY cantidad_facturas DESC, t.TrackId ASC
 
 GO
-
 
 -- C22 | Clientes con variedad de medios
 -- Mostrar CustomerId, nombre, apellido y cantidad de MediaTypeId distintos efectivamente comprados; incluir solo clientes con al menos dos tipos de medio. Ordenar por cantidad descendente y CustomerId.
 
+SELECT c.CustomerId, c.FirstName, c.LastName, COUNT(DISTINCT(m.MediaTypeId)) as cantidad_medias
+FROM Customer c 
+JOIN Invoice i ON i.CustomerId = c.CustomerId
+JOIN InvoiceLine il ON i.InvoiceId = il.InvoiceId
+JOIN Track t ON il.TrackId = t.TrackId
+JOIN MediaType m ON m.MediaTypeId = t.MediaTypeId
+GROUP BY c.CustomerId, c.FirstName, c.LastName
+HAVING COUNT(DISTINCT(m.MediaTypeId)) > 1
+ORDER BY cantidad_medias DESC, c.CustomerId ASC
 
 GO
 
